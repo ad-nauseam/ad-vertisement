@@ -1,0 +1,11 @@
+[package]
+name = "ad-vertisement"
+version = "0.1.0"
+authors = ["megatank58", "vaporoxx"]
+edition = "2024"
+description = "Ad Nauseam blog bot"
+repository = "https://github.com/ad-nauseam/ad-vertisement"
+license = "ISC"
+
+[dependencies]
+serenity = "0.12"
