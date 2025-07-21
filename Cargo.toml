@@ -8,4 +8,10 @@ repository = "https://github.com/ad-nauseam/ad-vertisement"
 license = "ISC"
 
 [dependencies]
+anyhow = "1"
+dotenv = "0.15"
 serenity = "0.12"
+
+[dependencies.tokio]
+version = "1"
+features = ["macros", "rt-multi-thread"]

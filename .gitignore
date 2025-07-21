@@ -1,2 +1,6 @@
+# Build
 Cargo.lock
 target
+
+# Private
+.env
