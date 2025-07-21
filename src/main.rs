@@ -1,10 +1,14 @@
+#![deny(clippy::all, clippy::nursery)]
+
+mod commands;
 mod handler;
 
 use std::env;
 
 use anyhow::Result;
-use handler::Handler;
 use serenity::all::{ActivityData, Client, GatewayIntents};
+
+use crate::handler::Handler;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -14,7 +18,7 @@ async fn main() -> Result<()> {
 	let intents = GatewayIntents::GUILD_MESSAGES;
 
 	let mut client = Client::builder(token, intents)
-		.activity(ActivityData::custom("around with my balls"))
+		.activity(ActivityData::playing("around with my balls"))
 		.event_handler(Handler)
 		.await?;
 

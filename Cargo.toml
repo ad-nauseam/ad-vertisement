@@ -6,6 +6,7 @@ edition = "2024"
 description = "Ad Nauseam blog bot"
 repository = "https://github.com/ad-nauseam/ad-vertisement"
 license = "ISC"
+default-run = "ad-vertisement"
 
 [dependencies]
 anyhow = "1"
