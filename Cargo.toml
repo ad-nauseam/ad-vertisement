@@ -1,12 +1,12 @@
 [package]
-name = "ad-vertisement"
+name = "bloggies"
 version = "0.1.0"
 authors = ["megatank58", "vaporoxx"]
 edition = "2024"
 description = "Ad Nauseam blog bot"
-repository = "https://github.com/ad-nauseam/ad-vertisement"
+repository = "https://github.com/ad-nauseam/bloggies"
 license = "ISC"
-default-run = "ad-vertisement"
+default-run = "bloggies"
 
 [dependencies]
 anyhow = "1"
