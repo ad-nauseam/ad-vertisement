@@ -10,7 +10,6 @@ default-run = "bloggies"
 
 [dependencies]
 anyhow = "1"
-chrono = "0.4.41"
 dotenv = "0.15"
 serenity = "0.12"
 
