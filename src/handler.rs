@@ -17,6 +17,7 @@ impl EventHandler for Handler {
 				"delete" => commands::blog::delete(ctx, command).await,
 				name => Err(anyhow::anyhow!("Invalid blog subcommand: '{name}'")),
 			},
+			"timeoutme" => commands::timeoutme::timeoutme(ctx, command).await,
 			name => Err(anyhow::anyhow!("Invalid command: '{name}'")),
 		};
 
