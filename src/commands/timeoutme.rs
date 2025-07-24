@@ -3,7 +3,7 @@ use std::time::SystemTime;
 use anyhow::Result;
 use serenity::all::{CommandInteraction, Context, CreateInteractionResponse, CreateInteractionResponseMessage, Timestamp};
 
-pub async fn timeoutme(ctx: Context, mut interaction: CommandInteraction) -> Result<()> {
+pub async fn timeoutme(ctx: &Context, interaction: &mut CommandInteraction) -> Result<()> {
 	let Some(option) = interaction.data.options.first() else {
 		anyhow::bail!("No options present");
 	};
