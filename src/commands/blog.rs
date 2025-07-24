@@ -3,7 +3,8 @@ use std::env;
 use anyhow::Result;
 use serenity::all::{
 	CommandDataOptionValue, CommandInteraction, Context, CreateChannel, CreateInteractionResponse,
-	CreateInteractionResponseMessage, EditChannel, PermissionOverwrite, PermissionOverwriteType, Permissions, RoleId,
+	CreateInteractionResponseMessage, EditChannel, GuildChannel, PermissionOverwrite, PermissionOverwriteType,
+	Permissions, RoleId,
 };
 
 pub async fn create(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
@@ -38,7 +39,28 @@ pub async fn create(ctx: &Context, interaction: &CommandInteraction) -> Result<(
 		])
 		.topic(interaction.user.id.to_string());
 
-	guild.create_channel(&ctx, channel).await.unwrap();
+	let mut new_channel = guild.create_channel(&ctx, channel).await.unwrap();
+
+	let channels = guild.channels(&ctx).await.unwrap();
+
+	let mut ids = channels
+		.values()
+		.filter(|f| f.parent_id.is_some() && f.parent_id.unwrap() == *category)
+		.collect::<Vec<&GuildChannel>>();
+
+	ids.sort_by(|a, b| a.name.cmp(&b.name));
+
+	let mut last_pos = ids[0].position;
+	for id in ids {
+		if id.topic == Some(interaction.user.id.to_string()) {
+			new_channel
+				.edit(&ctx, EditChannel::new().position(last_pos))
+				.await
+				.unwrap();
+			break;
+		}
+		last_pos = id.position
+	}
 
 	interaction.create_response(&ctx, response).await?;
 
@@ -77,6 +99,26 @@ pub async fn nick(ctx: &Context, interaction: &CommandInteraction) -> Result<()>
 	};
 
 	channel.edit(&ctx, EditChannel::new().name(name)).await.unwrap();
+
+	let channels = guild.channels(&ctx).await.unwrap();
+
+	let category = channels.iter().find(|(_, channel)| channel.name == "Blogs").unwrap().0;
+
+	let mut ids = channels
+		.values()
+		.filter(|f| f.parent_id.is_some() && f.parent_id.unwrap() == *category)
+		.collect::<Vec<&GuildChannel>>();
+
+	ids.sort_by(|a, b| a.name.cmp(&b.name));
+
+	let mut last_pos = ids[0].position;
+	for id in ids {
+		if id.topic == Some(interaction.user.id.to_string()) {
+			channel.edit(&ctx, EditChannel::new().position(last_pos)).await.unwrap();
+			break;
+		}
+		last_pos = id.position
+	}
 
 	interaction.create_response(&ctx, response).await?;
 
