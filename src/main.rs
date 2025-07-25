@@ -18,10 +18,7 @@ async fn main() -> Result<()> {
 	let intents = GatewayIntents::GUILD_MESSAGES;
 
 	let mut client = Client::builder(token, intents)
-		.activity(ActivityData::streaming(
-			"around with calcagebra!",
-			"https://github.com/calcagebra/calcagebra",
-		)?)
+		.activity(ActivityData::playing("around with my balls"))
 		.event_handler(Handler)
 		.await?;
 
