@@ -32,12 +32,6 @@ impl EventHandler for Handler {
 		}
 	}
 
-	async fn message(&self, ctx: Context, message: Message) {
-		if message.mentions_me(&ctx).await.unwrap_or_default() {
-			message.reply(&ctx, "Please use my slash commands!").await.ok();
-		}
-	}
-
 	async fn ready(&self, _: Context, ready: Ready) {
 		println!("{} is running!", ready.user.name);
 	}
