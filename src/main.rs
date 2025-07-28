@@ -15,7 +15,7 @@ async fn main() -> Result<()> {
 	dotenv::dotenv()?;
 
 	let token = env::var("TOKEN")?;
-	let intents = GatewayIntents::GUILD_MEMBERS;
+	let intents = GatewayIntents::from_bits_retain(0);
 
 	let mut client = Client::builder(token, intents)
 		.activity(ActivityData::playing("around with my balls"))
