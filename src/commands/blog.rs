@@ -147,20 +147,28 @@ pub async fn delete(ctx: &Context, interaction: &CommandInteraction) -> Result<(
 }
 
 pub async fn webhook(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-	let webhook = interaction
-		.channel_id
-		.create_webhook(&ctx, CreateWebhook::new("BlogHook"))
-		.await;
+	let webhooks = interaction.channel_id.webhooks(&ctx).await?;
+	let existing_webhook = webhooks
+		.iter()
+		.find(|f| f.name.is_some() && f.name.as_ref().unwrap() == "BlogHook");
 
-	if webhook.is_err() {
-		anyhow::bail!("Error while creating webhook: {}", webhook.err().unwrap())
-	}
+	let url = if existing_webhook.is_some() {
+		existing_webhook.unwrap().url()?
+	} else {
+		let webhook = interaction
+			.channel_id
+			.create_webhook(&ctx, CreateWebhook::new("BlogHook"))
+			.await;
+
+		if webhook.is_err() {
+			anyhow::bail!("Error while creating webhook: {}", webhook.err().unwrap())
+		}
+
+		webhook?.url()?
+	};
 
 	let message = CreateInteractionResponseMessage::new()
-		.content(format!(
-			"Your blog channel's webhook URL is: {}",
-			webhook.unwrap().url()?
-		))
+		.content(format!("Your blog channel's webhook URL is: {}", url))
 		.ephemeral(true);
 
 	let response = CreateInteractionResponse::Message(message);
