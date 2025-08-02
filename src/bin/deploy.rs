@@ -19,10 +19,11 @@ async fn main() -> Result<()> {
 			CreateCommandOption::new(CommandOptionType::String, "name", "New name of your blog"),
 		);
 	let delete = CreateCommandOption::new(CommandOptionType::SubCommand, "delete", "Deletes your blog");
+	let webhook = CreateCommandOption::new(CommandOptionType::SubCommand, "webhook", "Get webhook for your blog");
 
 	let blog = CreateCommand::new("blog")
 		.description("Commands related to blog management")
-		.set_options(vec![create, nick, delete]);
+		.set_options(vec![create, nick, delete, webhook]);
 
 	let duration = CreateCommandOption::new(CommandOptionType::Integer, "duration", "Duration of the timeout")
 		.add_int_choice("1 hour", 3600)

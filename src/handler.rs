@@ -1,5 +1,5 @@
 use serenity::all::{
-	Context, CreateInteractionResponse, CreateInteractionResponseMessage, EventHandler, Interaction, Message, Ready,
+	Context, CreateInteractionResponse, CreateInteractionResponseMessage, EventHandler, Interaction, Ready,
 };
 
 use crate::commands;
@@ -18,6 +18,7 @@ impl EventHandler for Handler {
 				"create" => commands::blog::create(&ctx, &command).await,
 				"nick" => commands::blog::nick(&ctx, &command).await,
 				"delete" => commands::blog::delete(&ctx, &command).await,
+				"webhook" => commands::blog::webhook(&ctx, &command).await,
 				name => Err(anyhow::anyhow!("Invalid blog subcommand: '{name}'")),
 			},
 			"timeoutme" => commands::timeoutme::timeoutme(&ctx, &mut command).await,
