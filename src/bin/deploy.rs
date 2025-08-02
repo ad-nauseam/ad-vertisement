@@ -14,11 +14,11 @@ async fn main() -> Result<()> {
 	let http = HttpBuilder::new(token).application_id(application_id).build();
 
 	let create = CreateCommandOption::new(CommandOptionType::SubCommand, "create", "Creates a new blog");
+	let delete = CreateCommandOption::new(CommandOptionType::SubCommand, "delete", "Deletes your blog");
 	let nick =
 		CreateCommandOption::new(CommandOptionType::SubCommand, "nick", "Changes name of your blog").add_sub_option(
 			CreateCommandOption::new(CommandOptionType::String, "name", "New name of your blog"),
 		);
-	let delete = CreateCommandOption::new(CommandOptionType::SubCommand, "delete", "Deletes your blog");
 	let webhook = CreateCommandOption::new(CommandOptionType::SubCommand, "webhook", "Get webhook for your blog");
 
 	let blog = CreateCommand::new("blog")
