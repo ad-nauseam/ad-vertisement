@@ -3,8 +3,8 @@ use std::env;
 use anyhow::Result;
 use serenity::all::{
 	CommandDataOptionValue, CommandInteraction, Context, CreateChannel, CreateInteractionResponse,
-	CreateInteractionResponseMessage, EditChannel, GuildChannel, PermissionOverwrite, PermissionOverwriteType,
-	Permissions, RoleId,
+	CreateInteractionResponseMessage, CreateWebhook, EditChannel, GuildChannel, PermissionOverwrite,
+	PermissionOverwriteType, Permissions, RoleId,
 };
 
 pub async fn create(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
@@ -140,6 +140,38 @@ pub async fn delete(ctx: &Context, interaction: &CommandInteraction) -> Result<(
 	};
 
 	channel.delete(&ctx).await.unwrap();
+
+	interaction.create_response(&ctx, response).await?;
+
+	Ok(())
+}
+
+pub async fn webhook(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+	let webhooks = interaction.channel_id.webhooks(&ctx).await?;
+	let existing_webhook = webhooks
+		.iter()
+		.find(|f| f.name.is_some() && f.name.as_ref().unwrap() == "BlogHook");
+
+	let url = if existing_webhook.is_some() {
+		existing_webhook.unwrap().url()?
+	} else {
+		let webhook = interaction
+			.channel_id
+			.create_webhook(&ctx, CreateWebhook::new("BlogHook"))
+			.await;
+
+		if webhook.is_err() {
+			anyhow::bail!("Error while creating webhook: {}", webhook.err().unwrap())
+		}
+
+		webhook?.url()?
+	};
+
+	let message = CreateInteractionResponseMessage::new()
+		.content(format!("Your blog channel's webhook URL is: {}", url))
+		.ephemeral(true);
+
+	let response = CreateInteractionResponse::Message(message);
 
 	interaction.create_response(&ctx, response).await?;
 
