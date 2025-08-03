@@ -157,7 +157,21 @@ pub async fn delete(ctx: &Context, interaction: &CommandInteraction) -> Result<(
 }
 
 pub async fn webhook(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-	let webhooks = interaction.channel_id.webhooks(&ctx).await?;
+	let Some(guild) = &interaction.guild_id else {
+		anyhow::bail!("Interaction does not has a guild!")
+	};
+
+	let mut channels = guild.channels(&ctx).await?;
+
+	let Some((channel, _)) = channels
+		.iter_mut()
+		.find(|(_, channel)| channel.topic == Some(interaction.user.id.to_string()))
+	else {
+		anyhow::bail!("You don't have a blog silly goose!")
+	};
+
+	let webhooks = channel.webhooks(&ctx).await?;
+
 	let existing_webhook = webhooks
 		.iter()
 		.find(|f| f.name.is_some() && f.name.as_ref().unwrap() == "BlogHook");
