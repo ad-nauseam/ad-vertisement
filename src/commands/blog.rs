@@ -179,10 +179,7 @@ pub async fn webhook(ctx: &Context, interaction: &CommandInteraction) -> Result<
 	let url = if existing_webhook.is_some() {
 		existing_webhook.unwrap().url()?
 	} else {
-		let webhook = interaction
-			.channel_id
-			.create_webhook(&ctx, CreateWebhook::new("BlogHook"))
-			.await;
+		let webhook = channel.create_webhook(&ctx, CreateWebhook::new("BlogHook")).await;
 
 		if webhook.is_err() {
 			anyhow::bail!("Error while creating webhook: {}", webhook.err().unwrap())
@@ -192,7 +189,7 @@ pub async fn webhook(ctx: &Context, interaction: &CommandInteraction) -> Result<
 	};
 
 	let message = CreateInteractionResponseMessage::new()
-		.content(format!("Your blog channel's webhook URL is: {}", url))
+		.content(format!("Your blog channel's webhook URL is: {url}"))
 		.ephemeral(true);
 
 	let response = CreateInteractionResponse::Message(message);
