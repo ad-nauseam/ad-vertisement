@@ -28,7 +28,7 @@ pub async fn me(ctx: &Context, interaction: &CommandInteraction, options: &[Comm
 
 	let response = CreateInteractionResponse::Message(message);
 
-	interaction.create_response(&ctx, response).await?;
+	interaction.create_response(ctx, response).await?;
 
 	Ok(())
 }

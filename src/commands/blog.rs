@@ -72,7 +72,7 @@ pub async fn rename(ctx: &Context, interaction: &CommandInteraction, options: &[
 	let message = CreateInteractionResponseMessage::new().content("Your blog channel has been renamed!");
 	let response = CreateInteractionResponse::Message(message);
 
-	interaction.create_response(&ctx, response).await?;
+	interaction.create_response(ctx, response).await?;
 
 	Ok(())
 }

@@ -20,7 +20,7 @@ impl Blogs {
 			anyhow::bail!("Interaction was not sent from a guild");
 		};
 
-		let channels = guild.channels(&ctx).await?;
+		let channels = guild.channels(ctx).await?;
 
 		let Some((&parent, _)) = channels.iter().find(|(_, channel)| channel.name == "Blogs") else {
 			anyhow::bail!("Could not find the blog category");
