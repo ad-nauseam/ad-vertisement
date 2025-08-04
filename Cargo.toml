@@ -11,7 +11,10 @@ default-run = "bloggies"
 [dependencies]
 anyhow = "1"
 dotenv = "0.15"
-serenity = "0.12"
+
+[dependencies.serenity]
+version = "0.12"
+features = ["collector"]
 
 [dependencies.tokio]
 version = "1"
