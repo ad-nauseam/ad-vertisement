@@ -1,8 +1,10 @@
+use std::time::Duration;
+
 use anyhow::Result;
 use serenity::all::{
-	CommandDataOption, CommandInteraction, Context, CreateChannel, CreateInteractionResponse,
-	CreateInteractionResponseMessage, CreateWebhook, EditChannel, PermissionOverwrite, PermissionOverwriteType,
-	Permissions, Webhook,
+	ActionRowComponent, CommandDataOption, CommandInteraction, Context, CreateActionRow, CreateChannel,
+	CreateInputText, CreateInteractionResponse, CreateInteractionResponseMessage, CreateModal, CreateWebhook,
+	EditChannel, ModalInteractionCollector, PermissionOverwrite, PermissionOverwriteType, Permissions, Webhook,
 };
 
 use crate::blogs::Blogs;
@@ -47,12 +49,39 @@ pub async fn delete(ctx: &Context, interaction: &CommandInteraction) -> Result<(
 	let mut blogs = Blogs::new(ctx, interaction).await?;
 	let channel = blogs.channel(interaction.user.id)?;
 
-	channel.delete(ctx).await?;
+	let modal = CreateModal::new(interaction.user.id.to_string(), "Blog Deletion Confirmation").components(vec![
+		CreateActionRow::InputText(CreateInputText::new(
+			serenity::all::InputTextStyle::Short,
+			format!("Enter {} for confirmation", channel.name),
+			interaction.user.id.to_string(),
+		)),
+	]);
+
+	let response = CreateInteractionResponse::Modal(modal);
+
+	interaction.create_response(ctx, response).await?;
+
+	let modal_interaction = ModalInteractionCollector::new(&ctx.shard)
+		.timeout(Duration::new(60, 0))
+		.await
+		.unwrap();
+
+	let ActionRowComponent::InputText(text) = &modal_interaction.data.components[0].components[0] else {
+		anyhow::bail!("Expected text input component")
+	};
+
+	let Some(value) = &text.value else {
+		anyhow::bail!("Expected value in text input")
+	};
+
+	if value == &channel.name {
+		channel.delete(&ctx).await?;
+	}
 
 	let message = CreateInteractionResponseMessage::new().content("Your blog channel has been deleted!");
 	let response = CreateInteractionResponse::Message(message);
 
-	interaction.create_response(ctx, response).await?;
+	modal_interaction.create_response(ctx, response).await?;
 
 	Ok(())
 }
@@ -89,7 +118,7 @@ pub async fn webhook(ctx: &Context, interaction: &CommandInteraction) -> Result<
 	};
 
 	let message = CreateInteractionResponseMessage::new()
-		.content(format!("Creation of your webhook was successful!\n\n-# {}", url))
+		.content(format!("Creation of your webhook was successful!\n\n-# {url}"))
 		.ephemeral(true);
 
 	let response = CreateInteractionResponse::Message(message);
