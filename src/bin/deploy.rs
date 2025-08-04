@@ -15,28 +15,32 @@ async fn main() -> Result<()> {
 
 	let create = CreateCommandOption::new(CommandOptionType::SubCommand, "create", "Creates a new blog");
 	let delete = CreateCommandOption::new(CommandOptionType::SubCommand, "delete", "Deletes your blog");
-	let nick =
-		CreateCommandOption::new(CommandOptionType::SubCommand, "nick", "Changes name of your blog").add_sub_option(
-			CreateCommandOption::new(CommandOptionType::String, "name", "New name of your blog"),
-		);
-	let webhook = CreateCommandOption::new(CommandOptionType::SubCommand, "webhook", "Get webhook for your blog");
+	let webhook = CreateCommandOption::new(CommandOptionType::SubCommand, "webhook", "Gets a webhook for your blog");
+
+	let name = CreateCommandOption::new(CommandOptionType::String, "name", "The new name")
+		.min_length(2)
+		.max_length(32);
+
+	let rename = CreateCommandOption::new(CommandOptionType::SubCommand, "rename", "Renames your blog")
+		.set_sub_options(vec![name]);
 
 	let blog = CreateCommand::new("blog")
 		.description("Commands related to blog management")
-		.set_options(vec![create, nick, delete, webhook]);
+		.set_options(vec![create, delete, rename, webhook]);
 
-	let duration = CreateCommandOption::new(CommandOptionType::Integer, "duration", "Duration of the timeout")
-		.add_int_choice("1 hour", 3600)
-		.add_int_choice("2 hours", 7200)
-		.add_int_choice("3 hours", 10800)
-		.add_int_choice("4 hours", 14400)
+	let duration = CreateCommandOption::new(CommandOptionType::Integer, "duration", "The duration in hours")
+		.min_int_value(1)
+		.max_int_value(24)
 		.required(true);
 
-	let timeoutme = CreateCommand::new("timeoutme")
-		.description("Times you out")
-		.set_options(vec![duration]);
+	let me = CreateCommandOption::new(CommandOptionType::SubCommand, "me", "Times you out for a few hours")
+		.set_sub_options(vec![duration]);
 
-	guild_id.set_commands(&http, vec![blog, timeoutme]).await?;
+	let timeout = CreateCommand::new("timeout")
+		.description("Commands related to timeout management")
+		.set_options(vec![me]);
+
+	guild_id.set_commands(&http, vec![blog, timeout]).await?;
 
 	Ok(())
 }

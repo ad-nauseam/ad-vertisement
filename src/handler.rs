@@ -1,5 +1,6 @@
 use serenity::all::{
-	Context, CreateInteractionResponse, CreateInteractionResponseMessage, EventHandler, Interaction, Ready,
+	CommandDataOptionValue, Context, CreateInteractionResponse, CreateInteractionResponseMessage, EventHandler,
+	Interaction, Ready,
 };
 
 use crate::commands;
@@ -9,27 +10,43 @@ pub struct Handler;
 #[serenity::async_trait]
 impl EventHandler for Handler {
 	async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
-		let Interaction::Command(mut command) = interaction else {
+		let Interaction::Command(command) = interaction else {
+			return;
+		};
+
+		let Some(subcommand) = command.data.options.first() else {
+			return;
+		};
+
+		let CommandDataOptionValue::SubCommand(options) = &subcommand.value else {
 			return;
 		};
 
 		let result = match command.data.name.as_str() {
-			"blog" => match command.data.options.first().map_or("", |option| &option.name) {
+			"blog" => match subcommand.name.as_str() {
 				"create" => commands::blog::create(&ctx, &command).await,
-				"nick" => commands::blog::nick(&ctx, &command).await,
 				"delete" => commands::blog::delete(&ctx, &command).await,
+				"rename" => commands::blog::rename(&ctx, &command, options).await,
 				"webhook" => commands::blog::webhook(&ctx, &command).await,
-				name => Err(anyhow::anyhow!("Invalid blog subcommand: '{name}'")),
+				_ => Err(anyhow::anyhow!("Invalid blog subcommand")),
 			},
-			"timeoutme" => commands::timeoutme::timeoutme(&ctx, &mut command).await,
-			name => Err(anyhow::anyhow!("Invalid command: '{name}'")),
+			"timeout" => match subcommand.name.as_str() {
+				"me" => commands::timeout::me(&ctx, &command, options).await,
+				_ => Err(anyhow::anyhow!("Invalid timeout subcommand")),
+			},
+			_ => Err(anyhow::anyhow!("Invalid command")),
 		};
 
 		if let Err(error) = result {
-			let message = CreateInteractionResponseMessage::new().content(error.to_string());
+			let message = CreateInteractionResponseMessage::new()
+				.content(format!(":no_entry_sign: {error}!"))
+				.ephemeral(true);
+
 			let response = CreateInteractionResponse::Message(message);
 
-			command.create_response(&ctx, response).await.unwrap();
+			if command.create_response(&ctx, response).await.is_err() {
+				eprintln!("An error occurred: {error}");
+			}
 		}
 	}
 
