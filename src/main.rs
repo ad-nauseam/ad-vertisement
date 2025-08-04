@@ -1,5 +1,6 @@
 #![deny(clippy::all, clippy::nursery)]
 
+mod blogs;
 mod commands;
 mod handler;
 
