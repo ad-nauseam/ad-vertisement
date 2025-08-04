@@ -16,15 +16,16 @@ impl Blogs {
 	}
 
 	pub async fn new(ctx: &Context, interaction: &CommandInteraction) -> Result<Self> {
-		let Some(guild) = interaction.guild_id else {
-			anyhow::bail!("Interaction was not sent from a guild");
-		};
+		let guild = interaction
+			.guild_id
+			.ok_or_else(|| anyhow::anyhow!("Interaction was not sent from a guild"))?;
 
 		let channels = guild.channels(ctx).await?;
 
-		let Some((&parent, _)) = channels.iter().find(|(_, channel)| channel.name == "Blogs") else {
-			anyhow::bail!("Could not find the blog category");
-		};
+		let (&parent, _) = channels
+			.iter()
+			.find(|(_, channel)| channel.name == "Blogs")
+			.ok_or_else(|| anyhow::anyhow!("Could not find the blog category"))?;
 
 		let children: Vec<_> = channels
 			.into_values()

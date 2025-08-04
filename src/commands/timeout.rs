@@ -5,13 +5,15 @@ use serenity::all::{
 };
 
 pub async fn me(ctx: &Context, interaction: &CommandInteraction, options: &[CommandDataOption]) -> Result<()> {
-	let Some(duration) = options.first().and_then(|option| option.value.as_i64()) else {
-		anyhow::bail!("Duration is not present");
-	};
+	let duration = options
+		.first()
+		.and_then(|option| option.value.as_i64())
+		.ok_or_else(|| anyhow::anyhow!("Duration is not present"))?;
 
-	let Some(member) = interaction.member.as_deref() else {
-		anyhow::bail!("Command was not used in a guild");
-	};
+	let member = interaction
+		.member
+		.as_deref()
+		.ok_or_else(|| anyhow::anyhow!("Command was not used in a guild"))?;
 
 	let seconds = Timestamp::now().unix_timestamp() + duration * 3600;
 	let timestamp = Timestamp::from_unix_timestamp(seconds)?;

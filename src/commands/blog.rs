@@ -89,7 +89,7 @@ pub async fn webhook(ctx: &Context, interaction: &CommandInteraction) -> Result<
 	};
 
 	let message = CreateInteractionResponseMessage::new()
-		.content(format!("Creation of your [webhook]({}) was successful!", url))
+		.content(format!("Creation of your webhook was successful!\n\n-# {}", url))
 		.ephemeral(true);
 
 	let response = CreateInteractionResponse::Message(message);
