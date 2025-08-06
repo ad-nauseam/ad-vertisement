@@ -49,13 +49,15 @@ pub async fn delete(ctx: &Context, interaction: &CommandInteraction) -> Result<(
 	let mut blogs = Blogs::new(ctx, interaction).await?;
 	let channel = blogs.channel(interaction.user.id)?;
 
-	let modal = CreateModal::new(interaction.user.id.to_string(), "Blog Deletion Confirmation").components(vec![
-		CreateActionRow::InputText(CreateInputText::new(
+	let user_id = interaction.user.id.to_string();
+
+	let modal = CreateModal::new(&user_id, "Blog Deletion Confirmation").components(vec![CreateActionRow::InputText(
+		CreateInputText::new(
 			serenity::all::InputTextStyle::Short,
 			format!("Enter {} for confirmation", channel.name),
-			interaction.user.id.to_string(),
-		)),
-	]);
+			&user_id,
+		),
+	)]);
 
 	let response = CreateInteractionResponse::Modal(modal);
 
@@ -63,6 +65,7 @@ pub async fn delete(ctx: &Context, interaction: &CommandInteraction) -> Result<(
 
 	let modal_interaction = ModalInteractionCollector::new(&ctx.shard)
 		.timeout(Duration::new(60, 0))
+		.filter(move |f| f.user.id.to_string() == user_id)
 		.await
 		.unwrap();
 
