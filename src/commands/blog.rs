@@ -4,7 +4,7 @@ use anyhow::Result;
 use serenity::all::{
 	ActionRowComponent, CommandDataOption, CommandInteraction, Context, CreateActionRow, CreateChannel,
 	CreateInputText, CreateInteractionResponse, CreateInteractionResponseMessage, CreateModal, CreateWebhook,
-	EditChannel, ModalInteractionCollector, PermissionOverwrite, PermissionOverwriteType, Permissions, Webhook,
+	EditChannel, ModalInteractionCollector, PermissionOverwrite, PermissionOverwriteType, Permissions, UserId, Webhook,
 };
 
 use crate::blogs::Blogs;
@@ -77,11 +77,14 @@ pub async fn delete(ctx: &Context, interaction: &CommandInteraction) -> Result<(
 		anyhow::bail!("Expected value in text input")
 	};
 
-	if value == &channel.name {
+	let content = if value.trim() == &channel.name {
 		channel.delete(&ctx).await?;
-	}
+		"Your blog channel has been deleted!"
+	} else {
+		"Blog deletion cancelled, please enter correct name."
+	};
 
-	let message = CreateInteractionResponseMessage::new().content("Your blog channel has been deleted!");
+	let message = CreateInteractionResponseMessage::new().content(content);
 	let response = CreateInteractionResponse::Message(message);
 
 	modal_interaction.create_response(ctx, response).await?;
