@@ -49,13 +49,16 @@ pub async fn delete(ctx: &Context, interaction: &CommandInteraction) -> Result<(
 	let mut blogs = Blogs::new(ctx, interaction).await?;
 	let channel = blogs.channel(interaction.user.id)?;
 
-	let modal = CreateModal::new(interaction.user.id.to_string(), "Blog Deletion Confirmation").components(vec![
-		CreateActionRow::InputText(CreateInputText::new(
-			serenity::all::InputTextStyle::Short,
-			format!("Enter {} for confirmation", channel.name),
-			interaction.user.id.to_string(),
-		)),
-	]);
+	let custom_id = interaction.id.to_string();
+
+	let modal =
+		CreateModal::new(&custom_id, "Blog Deletion Confirmation").components(vec![CreateActionRow::InputText(
+			CreateInputText::new(
+				serenity::all::InputTextStyle::Short,
+				format!("Enter {} for confirmation", channel.name),
+				&custom_id,
+			),
+		)]);
 
 	let response = CreateInteractionResponse::Modal(modal);
 
@@ -63,6 +66,7 @@ pub async fn delete(ctx: &Context, interaction: &CommandInteraction) -> Result<(
 
 	let modal_interaction = ModalInteractionCollector::new(&ctx.shard)
 		.timeout(Duration::new(60, 0))
+		.custom_ids(vec![custom_id])
 		.await
 		.unwrap();
 
@@ -74,11 +78,14 @@ pub async fn delete(ctx: &Context, interaction: &CommandInteraction) -> Result<(
 		anyhow::bail!("Expected value in text input")
 	};
 
-	if value == &channel.name {
+	let content = if value.trim() == &channel.name {
 		channel.delete(&ctx).await?;
-	}
+		"Your blog channel has been deleted!"
+	} else {
+		"Blog deletion cancelled, please enter correct name."
+	};
 
-	let message = CreateInteractionResponseMessage::new().content("Your blog channel has been deleted!");
+	let message = CreateInteractionResponseMessage::new().content(content);
 	let response = CreateInteractionResponse::Message(message);
 
 	modal_interaction.create_response(ctx, response).await?;
