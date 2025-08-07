@@ -66,7 +66,7 @@ pub async fn delete(ctx: &Context, interaction: &CommandInteraction) -> Result<(
 
 	let modal_interaction = ModalInteractionCollector::new(&ctx.shard)
 		.timeout(Duration::new(60, 0))
-		.filter(move |f| f.data.custom_id == custom_id)
+		.custom_ids(vec![custom_id])
 		.await
 		.unwrap();
 
