@@ -4,7 +4,7 @@ use anyhow::Result;
 use serenity::all::{
 	ActionRowComponent, CommandDataOption, CommandInteraction, Context, CreateActionRow, CreateChannel,
 	CreateInputText, CreateInteractionResponse, CreateInteractionResponseMessage, CreateModal, CreateWebhook,
-	EditChannel, ModalInteractionCollector, PermissionOverwrite, PermissionOverwriteType, Permissions, UserId, Webhook,
+	EditChannel, ModalInteractionCollector, PermissionOverwrite, PermissionOverwriteType, Permissions, Webhook,
 };
 
 use crate::blogs::Blogs;
