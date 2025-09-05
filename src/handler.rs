@@ -1,5 +1,6 @@
 use serenity::all::{
-	CommandDataOptionValue, Context, CreateInteractionResponseFollowup, EventHandler, Interaction, Message, Ready,
+	CommandDataOptionValue, Context, CreateInteractionResponse, CreateInteractionResponseMessage, EventHandler,
+	Interaction, Message, Ready,
 };
 
 use crate::commands;
@@ -37,11 +38,13 @@ impl EventHandler for Handler {
 		};
 
 		if let Err(error) = result {
-			let followup = CreateInteractionResponseFollowup::new()
+			let message = CreateInteractionResponseMessage::new()
 				.content(format!(":no_entry_sign: {error}!"))
 				.ephemeral(true);
 
-			if command.create_followup(&ctx, followup).await.is_err() {
+			let response = CreateInteractionResponse::Message(message);
+
+			if command.create_response(&ctx, response).await.is_err() {
 				eprintln!("An error occurred: {error}");
 			}
 		}

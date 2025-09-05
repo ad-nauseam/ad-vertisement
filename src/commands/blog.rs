@@ -60,7 +60,7 @@ pub async fn delete(ctx: &Context, interaction: &CommandInteraction) -> Result<(
 
 	let interaction = ModalInteractionCollector::new(&ctx.shard)
 		.author_id(interaction.user.id)
-		.timeout(Duration::from_mins(1))
+		.timeout(Duration::from_secs(60))
 		.await
 		.ok_or_else(|| anyhow::anyhow!("Modal timeout exceeded"))?;
 

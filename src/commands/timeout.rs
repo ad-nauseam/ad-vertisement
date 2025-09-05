@@ -1,7 +1,7 @@
 use anyhow::Result;
 use serenity::all::{
-	CommandDataOption, CommandInteraction, Context, CreateInteractionResponse, CreateInteractionResponseMessage,
-	EditMember, InteractionResponseFlags, Timestamp,
+	CommandDataOption, CommandInteraction, Context, CreateAllowedMentions, CreateInteractionResponse,
+	CreateInteractionResponseMessage, EditMember, Timestamp,
 };
 
 pub async fn me(ctx: &Context, interaction: &CommandInteraction, options: &[CommandDataOption]) -> Result<()> {
@@ -25,8 +25,8 @@ pub async fn me(ctx: &Context, interaction: &CommandInteraction, options: &[Comm
 	member.guild_id.edit_member(ctx, member.user.id, builder).await?;
 
 	let message = CreateInteractionResponseMessage::new()
-		.content(format!("<@{}> is now muted until <t:{}:t>", member.user.id, seconds))
-		.flags(InteractionResponseFlags::SUPPRESS_NOTIFICATIONS);
+		.allowed_mentions(CreateAllowedMentions::new())
+		.content(format!("<@{}> is now muted until <t:{}:t>", member.user.id, seconds));
 
 	let response = CreateInteractionResponse::Message(message);
 
