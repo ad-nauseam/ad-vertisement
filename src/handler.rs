@@ -1,6 +1,5 @@
 use serenity::all::{
-	CommandDataOptionValue, Context, CreateInteractionResponse, CreateInteractionResponseMessage, EventHandler,
-	Interaction, Ready,
+	CommandDataOptionValue, Context, CreateInteractionResponseFollowup, EventHandler, Interaction, Message, Ready,
 };
 
 use crate::commands;
@@ -38,15 +37,25 @@ impl EventHandler for Handler {
 		};
 
 		if let Err(error) = result {
-			let message = CreateInteractionResponseMessage::new()
+			let followup = CreateInteractionResponseFollowup::new()
 				.content(format!(":no_entry_sign: {error}!"))
 				.ephemeral(true);
 
-			let response = CreateInteractionResponse::Message(message);
-
-			if command.create_response(&ctx, response).await.is_err() {
+			if command.create_followup(&ctx, followup).await.is_err() {
 				eprintln!("An error occurred: {error}");
 			}
+		}
+	}
+
+	async fn message(&self, ctx: Context, message: Message) {
+		let topic = message
+			.guild_id
+			.and_then(|guild| ctx.cache.guild(guild))
+			.and_then(|guild| guild.channels.get(&message.channel_id).cloned())
+			.and_then(|channel| channel.topic);
+
+		if topic.is_some_and(|topic| message.author.id.to_string() != topic) {
+			message.delete(&ctx).await.ok();
 		}
 	}
 

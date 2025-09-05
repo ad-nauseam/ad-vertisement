@@ -4,7 +4,8 @@ use anyhow::Result;
 use serenity::all::{
 	ActionRowComponent, CommandDataOption, CommandInteraction, Context, CreateActionRow, CreateChannel,
 	CreateInputText, CreateInteractionResponse, CreateInteractionResponseMessage, CreateModal, CreateWebhook,
-	EditChannel, ModalInteractionCollector, PermissionOverwrite, PermissionOverwriteType, Permissions, Webhook,
+	EditChannel, InputTextStyle, ModalInteractionCollector, PermissionOverwrite, PermissionOverwriteType, Permissions,
+	Webhook,
 };
 
 use crate::blogs::Blogs;
@@ -49,46 +50,39 @@ pub async fn delete(ctx: &Context, interaction: &CommandInteraction) -> Result<(
 	let mut blogs = Blogs::new(ctx, interaction).await?;
 	let channel = blogs.channel(interaction.user.id)?;
 
-	let custom_id = interaction.id.to_string();
+	let label = format!("Enter your blog name: {}", channel.name);
+	let row = CreateActionRow::InputText(CreateInputText::new(InputTextStyle::Short, label, ""));
 
-	let modal =
-		CreateModal::new(&custom_id, "Blog Deletion Confirmation").components(vec![CreateActionRow::InputText(
-			CreateInputText::new(
-				serenity::all::InputTextStyle::Short,
-				format!("Enter {} for confirmation", channel.name),
-				&custom_id,
-			),
-		)]);
-
+	let modal = CreateModal::new("", "Confirm Deletion").components(vec![row]);
 	let response = CreateInteractionResponse::Modal(modal);
 
 	interaction.create_response(ctx, response).await?;
 
-	let modal_interaction = ModalInteractionCollector::new(&ctx.shard)
-		.timeout(Duration::new(60, 0))
-		.custom_ids(vec![custom_id])
+	let interaction = ModalInteractionCollector::new(&ctx.shard)
+		.author_id(interaction.user.id)
+		.timeout(Duration::from_mins(1))
 		.await
-		.unwrap();
+		.ok_or_else(|| anyhow::anyhow!("Modal timeout exceeded"))?;
 
-	let ActionRowComponent::InputText(text) = &modal_interaction.data.components[0].components[0] else {
-		anyhow::bail!("Expected text input component")
+	let Some(row) = interaction.data.components.first() else {
+		anyhow::bail!("No action row present");
 	};
 
-	let Some(value) = &text.value else {
-		anyhow::bail!("Expected value in text input")
+	let Some(ActionRowComponent::InputText(input)) = row.components.first() else {
+		anyhow::bail!("No input text present");
 	};
 
-	let content = if value.trim() == &channel.name {
+	let content = if input.value.as_ref() == Some(&channel.name) {
 		channel.delete(&ctx).await?;
 		"Your blog channel has been deleted!"
 	} else {
-		"Blog deletion cancelled, please enter correct name."
+		"Blog deletion cancelled, please enter the correct name!"
 	};
 
 	let message = CreateInteractionResponseMessage::new().content(content);
 	let response = CreateInteractionResponse::Message(message);
 
-	modal_interaction.create_response(ctx, response).await?;
+	interaction.create_response(ctx, response).await?;
 
 	Ok(())
 }

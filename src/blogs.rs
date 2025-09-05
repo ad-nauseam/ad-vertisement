@@ -20,7 +20,12 @@ impl Blogs {
 			.guild_id
 			.ok_or_else(|| anyhow::anyhow!("Interaction was not sent from a guild"))?;
 
-		let channels = guild.channels(ctx).await?;
+		let channels = ctx
+			.cache
+			.guild(guild)
+			.ok_or_else(|| anyhow::anyhow!("Could not find the guild in cache"))?
+			.channels
+			.clone();
 
 		let (&parent, _) = channels
 			.iter()
