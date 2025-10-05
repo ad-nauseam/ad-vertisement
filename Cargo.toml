@@ -10,7 +10,7 @@ default-run = "bloggies"
 
 [dependencies]
 anyhow = "1"
-dotenv = "0.15"
+dotenvy = "0.15"
 
 [dependencies.serenity]
 version = "0.12"

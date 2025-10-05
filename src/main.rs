@@ -13,7 +13,7 @@ use crate::handler::Handler;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-	dotenv::dotenv()?;
+	dotenvy::dotenv()?;
 
 	let token = env::var("TOKEN")?;
 	let intents = GatewayIntents::GUILDS | GatewayIntents::GUILD_MESSAGES;

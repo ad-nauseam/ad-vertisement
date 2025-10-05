@@ -5,7 +5,7 @@ use serenity::all::{CommandOptionType, CreateCommand, CreateCommandOption, Guild
 
 #[tokio::main]
 async fn main() -> Result<()> {
-	dotenv::dotenv()?;
+	dotenvy::dotenv()?;
 
 	let application_id = env::var("APPLICATION_ID")?.parse()?;
 	let guild_id: GuildId = env::var("GUILD_ID")?.parse()?;
