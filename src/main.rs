@@ -19,7 +19,7 @@ async fn main() -> Result<()> {
 	let intents = GatewayIntents::GUILDS | GatewayIntents::GUILD_MESSAGES;
 
 	let mut client = Client::builder(token, intents)
-		.activity(ActivityData::playing("around with my balls"))
+		.activity(ActivityData::playing("Playing around with my balls"))
 		.event_handler(Handler)
 		.await?;
 
